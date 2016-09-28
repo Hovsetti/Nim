@@ -1,18 +1,16 @@
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.Set;
 
 public class GameManager {
 
 	private final int START_ROW_ONE_SIZE = 3;
-	private Piece[] rowOne = new Piece[START_ROW_ONE_SIZE];
+	private ArrayList<Piece> rowOne = new ArrayList<Piece>();
 	private final int START_ROW_TWO_SIZE = 5;
-	private Piece[] rowTwo = new Piece[START_ROW_TWO_SIZE];
+	private ArrayList<Piece> rowTwo = new ArrayList<Piece>();
 	private final int START_ROW_THREE_SIZE = 7;
-	private Piece[] rowThree = new Piece[START_ROW_THREE_SIZE];
+	private ArrayList<Piece> rowThree = new ArrayList<Piece>();
 
 	private int piecesInRowOne = START_ROW_ONE_SIZE;
 	private int piecesInRowTwo = START_ROW_TWO_SIZE;
@@ -26,24 +24,26 @@ public class GameManager {
 
 	private Ai ai = new Ai();
 	private SmartAi smartAi = new SmartAi();
-	private HashMap<int[], Double> weightedTurns = new HashMap<int[], Double>();
-	private HashMap<Integer, int[]> gameInProgress = new HashMap<Integer, int[]>();
+	private HashMap<ArrayList<Integer>, Double> weightedTurns = new HashMap<ArrayList<Integer>, Double>();
+	private HashMap<Integer, ArrayList<Integer>> gameInProgress = new HashMap<Integer, ArrayList<Integer>>();
 	private int smartAiWins = 0;
 	private int aiWins = 0;
 
 	public GameManager(Player player, Board board){
-		populateRow(rowOne);
-		populateRow(rowTwo);
-		populateRow(rowThree);
+		populateRows(rowOne, rowTwo, rowThree);
 		this.player = player;
 		this.board = board;
-		weightedTurns.put(new int[]{3,5,7}, 0.0);
+		ArrayList<Integer> firstBoard = new ArrayList<Integer>();
+		firstBoard.add(3);
+		firstBoard.add(5);
+		firstBoard.add(7);
+		weightedTurns.put(firstBoard, 0.0);
 	}
 
 	public void runGame(){
 		boolean gameStarted = false;
 		int gamesPlayed = 0;
-		int gamesToPlay = 100000;
+		int gamesToPlay = 1000000;
 		while(!gameStarted){
 			System.out.print("ENTER 1 FOR PVP, 2 FOR PVAI, 3 FOR AIVAI: ");
 			int gameMode = scan.nextInt();
@@ -70,8 +70,8 @@ public class GameManager {
 					gameInProgress.clear();
 				}
 				gameStarted = true;
-				System.out.println("Smart Ai Won: " + smartAiWins);
-				System.out.println("Normal Ai Won: " + aiWins);
+				System.out.println("Smart Ai Won: " + ((double)smartAiWins/gamesToPlay)*100 + "%");
+				System.out.println("Normal Ai Won: " + ((double)aiWins/gamesToPlay)*100 + "%");
 			}else{
 				System.out.println("That is not a valid game mode! Try Again!");
 			}
@@ -165,7 +165,10 @@ public class GameManager {
 	}
 
 	private void storeCurrentGamestate(int currentTurn){
-		int[] rowStates = {piecesInRowOne, piecesInRowTwo, piecesInRowThree}; 
+		ArrayList<Integer> rowStates = new ArrayList<Integer>();
+		rowStates.add(piecesInRowOne);
+		rowStates.add(piecesInRowTwo);
+		rowStates.add(piecesInRowThree);
 		gameInProgress.put(currentTurn, rowStates);
 	}
 
@@ -194,9 +197,15 @@ public class GameManager {
 		}
 	}
 
-	private void populateRow(Piece[] pieces){
-		for(int j = 0; j < pieces.length; j++){
-			pieces[j] = new Piece();
+	private void populateRows(ArrayList<Piece> rowOne, ArrayList<Piece> rowTwo, ArrayList<Piece> rowThree){
+		for(int j = 0; j < START_ROW_ONE_SIZE; j++){
+			rowOne.add(new Piece());
+		}
+		for(int j = 0; j < START_ROW_TWO_SIZE; j++){
+			rowTwo.add(new Piece());
+		}
+		for(int j = 0; j < START_ROW_THREE_SIZE; j++){
+			rowThree.add(new Piece());
 		}
 	}
 
@@ -258,16 +267,15 @@ public class GameManager {
 	private void querySmartAi(){
 		smartAi.setPeicesChosen(false);
 		smartAi.setRowChosen(false);
-		int[] bestGameState = new int[]{0,0,0};
+		ArrayList<Integer> bestGameState = new ArrayList<Integer>();
 		double bestWeight = 0;
-		Set<int[]> mySet = weightedTurns.keySet();
-		Iterator<int[]> iter;
 		for(int j = 1; j<=piecesInRowOne; j++){
-			iter = mySet.iterator();
 			int potentialPieces = piecesInRowOne-j;
-			int[] potentialGameState = new int[]{potentialPieces, piecesInRowTwo, piecesInRowThree};
-			if(Arrays.equals(iter.next(), potentialGameState)){
-				System.out.println(potentialGameState.hashCode());
+			ArrayList<Integer> potentialGameState = new ArrayList<Integer>();
+			potentialGameState.add(potentialPieces);
+			potentialGameState.add(piecesInRowTwo);
+			potentialGameState.add(piecesInRowThree);
+			if(weightedTurns.containsKey(potentialGameState)){
 				if(weightedTurns.get(potentialGameState) > bestWeight){
 					bestGameState = potentialGameState;
 					bestWeight = weightedTurns.get(potentialGameState);
@@ -276,7 +284,10 @@ public class GameManager {
 		}
 		for(int j = 1; j<=piecesInRowTwo; j++){
 			int potentialPieces = piecesInRowTwo-j;
-			int[] potentialGameState = new int[]{piecesInRowOne, potentialPieces, piecesInRowThree};
+			ArrayList<Integer> potentialGameState = new ArrayList<Integer>();
+			potentialGameState.add(piecesInRowOne);
+			potentialGameState.add(potentialPieces);
+			potentialGameState.add(piecesInRowThree);
 			if(weightedTurns.containsKey(potentialGameState)){
 				if(weightedTurns.get(potentialGameState) > bestWeight){
 					bestGameState = potentialGameState;
@@ -286,7 +297,10 @@ public class GameManager {
 		}
 		for(int j = 1; j<=piecesInRowThree; j++){
 			int potentialPieces = piecesInRowThree-j;
-			int[] potentialGameState = new int[]{piecesInRowOne, piecesInRowTwo, potentialPieces};
+			ArrayList<Integer> potentialGameState = new ArrayList<Integer>();
+			potentialGameState.add(piecesInRowOne);
+			potentialGameState.add(piecesInRowTwo);
+			potentialGameState.add(potentialPieces);
 			if(weightedTurns.containsKey(potentialGameState)){
 				if(weightedTurns.get(potentialGameState) > bestWeight){
 					bestGameState = potentialGameState;
@@ -297,14 +311,14 @@ public class GameManager {
 		if(bestWeight<=0){
 			randomMove();
 		}else{
-			if(piecesInRowOne>bestGameState[0]){
-				int difference = piecesInRowOne-bestGameState[0];
+			if(piecesInRowOne>bestGameState.get(0)){
+				int difference = piecesInRowOne-bestGameState.get(0);
 				editPieces(1, difference);
-			}else if(piecesInRowTwo>bestGameState[1]){
-				int difference = piecesInRowTwo-bestGameState[1];
+			}else if(piecesInRowTwo>bestGameState.get(1)){
+				int difference = piecesInRowTwo-bestGameState.get(1);
 				editPieces(2, difference);
-			}else if(piecesInRowThree>bestGameState[2]){
-				int difference = piecesInRowThree-bestGameState[2];
+			}else if(piecesInRowThree>bestGameState.get(2)){
+				int difference = piecesInRowThree-bestGameState.get(2);
 				editPieces(3, difference);
 			}
 		}
@@ -402,11 +416,11 @@ public class GameManager {
 		totalPieces -= pieces;
 	}
 
-	private void removePieces(Piece[] row, int pieces, int piecesInRow){
+	private void removePieces(ArrayList<Piece> row, int pieces, int piecesInRow){
 		int placeToStartRemoval = (piecesInRow - pieces);
 		for(int j = 0; j < piecesInRow; j++){
 			if(j >= placeToStartRemoval){
-				row[j].setCharacter('-');
+				row.get(j).setCharacter('-');
 			}
 		}
 	}
@@ -421,10 +435,9 @@ public class GameManager {
 		resetPieces(rowThree);
 	}
 
-	private void resetPieces(Piece[] row){
-		for(int j = 0; j < row.length; j++){
-			row[j] = null;
-			row[j] = new Piece();
+	private void resetPieces(ArrayList<Piece> row){
+		for(int j = 0; j < row.size(); j++){
+			row.get(j).setCharacter('o');
 		}
 	}
 
