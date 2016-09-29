@@ -41,26 +41,27 @@ public class GameManager {
 	}
 
 	public void runGame(){
-		boolean gameStarted = false;
+		boolean gameEnded = false;
 		int gamesPlayed = 0;
-		int gamesToPlay = 1000000;
-		while(!gameStarted){
-			System.out.print("ENTER 1 FOR PVP, 2 FOR PVAI, 3 FOR AIVAI: ");
-			int gameMode = scan.nextInt();
+		int gamesToPlay = 1000;
+		while(!gameEnded){
+			System.out.print("ENTER 1 FOR PLAYER VS. PLAYER, 2 FOR PLAYER VS. DUMB AI\n"
+					+ "3 FOR DUMB AI VS SMART AI, 4 FOR SMART AI VS. SMART AI\n0 TO END THE GAME: ");
+			String input = scan.nextLine();
+			int gameMode = 0;
+			try{
+				gameMode = Integer.parseInt(input);
+			}catch(NumberFormatException e){
+
+			}
 			if(gameMode == 1){
-				while(gamesPlayed < gamesToPlay){
-					runPlayerVsPlayer();
-					gamesPlayed++;
-					resetBoard();
-				}
-				gameStarted = true;
+				runPlayerVsPlayer();
+				gamesPlayed++;
+				resetBoard();
 			}else if(gameMode == 2){
-				while(gamesPlayed < gamesToPlay){
-					runPlayerVsAi();
-					gamesPlayed++;
-					resetBoard();
-				}
-				gameStarted = true;
+				runPlayerVsAi();
+				gamesPlayed++;
+				resetBoard();
 			}else if(gameMode == 3){
 				while(gamesPlayed < gamesToPlay){
 					runAiVsSmartAi();
@@ -69,9 +70,26 @@ public class GameManager {
 					addGamestatesToMap();
 					gameInProgress.clear();
 				}
-				gameStarted = true;
 				System.out.println("Smart Ai Won: " + ((double)smartAiWins/gamesToPlay)*100 + "%");
 				System.out.println("Normal Ai Won: " + ((double)aiWins/gamesToPlay)*100 + "%");
+				smartAiWins = 0;
+				aiWins = 0;
+				gamesPlayed = 0;
+			}else if(gameMode == 4){
+				while(gamesPlayed < gamesToPlay){
+					runSmartAiVsSmartAi();
+					resetBoard();
+					gamesPlayed++;
+					addGamestatesToMap();
+					gameInProgress.clear();
+				}
+				System.out.println("Smart Ai One Won: " + ((double)smartAiWins/gamesToPlay)*100 + "%");
+				System.out.println("Smart Ai Two Won: " + ((double)aiWins/gamesToPlay)*100 + "%");
+				smartAiWins = 0;
+				aiWins = 0;
+				gamesPlayed = 0;
+			}else if(gameMode == 0){
+				System.exit(0);
 			}else{
 				System.out.println("That is not a valid game mode! Try Again!");
 			}
@@ -164,6 +182,51 @@ public class GameManager {
 		}
 	}
 
+	private void runSmartAiVsSmartAi(){
+		int currentTurn = 1;
+		String currentPlayer = "NO ONE";
+		boolean playOrder = rand.nextBoolean();
+		if(playOrder){
+			while(totalPieces > 0){
+				querySmartAi();
+				storeCurrentGamestate(currentTurn);
+				currentTurn++;
+				currentPlayer = "Smart Ai One";
+				if(totalPieces>0){
+					currentPlayer = "Smart Ai Two";
+					querySmartAi();
+					storeCurrentGamestate(currentTurn);
+					currentTurn++;
+				}
+			}
+			System.out.println(currentPlayer + " WINS!");
+			if(currentPlayer == "Smart Ai"){
+				smartAiWins++;
+			}else{
+				aiWins++;
+			}
+		}else if(!playOrder){
+			while(totalPieces > 0){
+				querySmartAi();
+				storeCurrentGamestate(currentTurn);
+				currentTurn++;
+				currentPlayer = "Smart Ai Two";
+				if(totalPieces>0){
+					currentPlayer = "Smart Ai One";
+					querySmartAi();
+					storeCurrentGamestate(currentTurn);
+					currentTurn++;
+				}
+			}
+			System.out.println(currentPlayer + " WINS!");
+			if(currentPlayer == "Smart Ai One"){
+				smartAiWins++;
+			}else{
+				aiWins++;
+			}
+		}
+	}
+
 	private void storeCurrentGamestate(int currentTurn){
 		ArrayList<Integer> rowStates = new ArrayList<Integer>();
 		rowStates.add(piecesInRowOne);
@@ -212,14 +275,27 @@ public class GameManager {
 	private void queryPlayer(){
 		player.setPeicesChosen(false);
 		player.setRowChosen(false);
+		scan = new Scanner(System.in);
 		while(!player.isRowChosen()){
-			System.out.print(player.getCurrentPlayer() + " choose your row: ");
-			int row = scan.nextInt();
+			System.out.print(player.getCurrentPlayer() + " choose your row(1-3): ");
+			String input = scan.nextLine();
+			int row = 0;
+			try{
+				row = Integer.parseInt(input);
+			}catch(NumberFormatException e){
+
+			}
 			if(checkRowValidity(row, true)){
 				player.setRowChosen(true);
 				while(!player.isPeicesChosen() && player.isRowChosen()){
 					System.out.print(player.getCurrentPlayer() + " (Enter 0 to restart your turn) How many pieces do you want to take: ");
-					int pieces = scan.nextInt();
+					String input2 = scan.nextLine();
+					int pieces = 0;
+					try{
+						pieces = Integer.parseInt(input2);
+					}catch(NumberFormatException e){
+
+					}
 					if(checkPieceValidity(row, pieces)){
 						player.setPeicesChosen(true);
 						if(player.isRowChosen()){
@@ -244,7 +320,7 @@ public class GameManager {
 						ai.setPeicesChosen(true);
 						if(ai.isRowChosen()){
 							editPieces(row, pieces);
-							//System.out.println("Ai has taken " + pieces + " from row " + row + "!");
+							System.out.println("Ai has taken " + pieces + " from row " + row + "!");
 						}
 					}
 				}
@@ -309,6 +385,24 @@ public class GameManager {
 			}
 		}
 		if(bestWeight<=0){
+			//			if(piecesInRowTwo == 0 && piecesInRowThree == 0){
+			//				int diffrence = piecesInRowOne - 1;
+			//				if(diffrence != 0){
+			//					editPieces(1, diffrence);
+			//				}
+			//			}else if(piecesInRowOne == 0 && piecesInRowThree == 0){
+			//				int diffrence = piecesInRowTwo - 1;
+			//				if(diffrence != 0){
+			//					editPieces(2, diffrence);
+			//				}
+			//			}else if(piecesInRowOne == 0 && piecesInRowTwo == 0){
+			//				int diffrence = piecesInRowThree - 1;
+			//				if(diffrence != 0){
+			//					editPieces(3, diffrence);
+			//				}
+			//			}else{
+			//				randomMove();
+			//			}
 			randomMove();
 		}else{
 			if(piecesInRowOne>bestGameState.get(0)){
@@ -370,7 +464,7 @@ public class GameManager {
 				}
 			}
 		}else{
-			System.out.println("Not a valid row! Pick Another!");
+			System.out.println("Not a valid row! Pick an INTEGER between 1 and 3!");
 		}
 		return isValid;
 	}
