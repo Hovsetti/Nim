@@ -13,6 +13,7 @@ public class Game {
 	private NewBoard _board;
 	private Random _random;
 	private Scanner _console;
+	private int _playerIndex;
 	
 	public Game() {
 		init();
@@ -25,6 +26,7 @@ public class Game {
 		_board = new NewBoard();
 		_random = new Random();
 		_console = new Scanner(System.in);
+		_playerIndex = 0;
 		
 		promptGameMode();
 	}
@@ -204,13 +206,13 @@ public class Game {
 			players = new NewPlayer[] { new HumanPlayer("Human 1"), new HumanPlayer("Human 2") };
 			break;
 		case 2:
-			players = new NewPlayer[] { new HumanPlayer("Human"), new NewDumbAi() };
+			players = new NewPlayer[] { new HumanPlayer("Human"), new NewDumbAi("DumbAI") };
 			break;
 		case 3:
-			players = new NewPlayer[] { new NewDumbAi(), new NewSmartAi() };
+			players = new NewPlayer[] { new NewDumbAi("DumbAI"), new NewSmartAi("SmartAI") };
 			break;
 		case 4:
-			players = new NewPlayer[] { new NewSmartAi(), new NewSmartAi() };
+			players = new NewPlayer[] { new NewSmartAi("SmartAI 1"), new NewSmartAi("SmartAI 2") };
 			break;
 			default:
 				throw new IllegalArgumentException(String.format("Invalid game mode: [%d]", gameMode));
@@ -219,11 +221,19 @@ public class Game {
 		return players;
 	}
 	
+	/**
+	 * Checks to see if the current game is over.
+	 * @return true if game is over.
+	 */
 	private boolean isOver() {
 		boolean isOver = _board.getPieceCount() < 1;
 		return isOver;
 	}
 	
+	/**
+	 * Main game loop. Runs in the specified game mode.
+	 * @param gameMode - game mode to run in
+	 */
 	private void run(int gameMode) {
 		if (gameMode == 0) {
 			quit();
@@ -233,44 +243,63 @@ public class Game {
 		_players = createPlayers(gameMode);
 		
 		for (int j = 0; j < ITERATIONS; ++j) {
-			int playerIndex = _random.nextInt(_players.length);
+			curPlayer = getRandPlayer();
 			
 			while (!isOver()) {
-				curPlayer = _players[playerIndex];
+				curPlayer = nextPlayer();
 				System.out.format("\n%s's turn: ", curPlayer);
 				
 				_board.draw();
-				
 				curPlayer.takeTurn(this);
-				
-				// get next player index
-				playerIndex = nextPlayerIndex(playerIndex);
 			}
-			playerIndex = nextPlayerIndex(playerIndex);
-			curPlayer = _players[playerIndex];
+			// winner is player that makes last move.
 			curPlayer.AddWin();
-			System.out.println("GAME OVER");
+			System.out.format("%s won!", curPlayer);
 			reset();
 		}
 		printStats();
 	}
 	
+	/**
+	 * Prints out the stats for all players.
+	 */
 	private void printStats() {
 		for (NewPlayer p : _players) {
 			double winRate = (double)p.getWinCount() / ITERATIONS;
-			System.out.format("%s won %f\n", p, winRate);
+			System.out.format("\n%s won %.2f%%\n", p, winRate);
 		}
 	}
 	
-	private int nextPlayerIndex(int playerIndex) {
-		int index = ((playerIndex + 1) >= _players.length) ? 0 : (playerIndex + 1);
-		return index;
+	/**
+	 * 
+	 * @return next player in the array.
+	 */
+	private NewPlayer nextPlayer() {
+		if (++_playerIndex >= _players.length) {
+			_playerIndex = 0;
+		}
+		NewPlayer player = _players[_playerIndex];
+		return player;
 	}
 	
+	/**
+	 * 
+	 * @return random player from the array
+	 */
+	private NewPlayer getRandPlayer() {
+		int index = _random.nextInt(_players.length);
+		NewPlayer player = _players[index];
+		return player;
+	}
+	
+	/**
+	 * Exits the application.
+	 */
 	private void quit() {
 		System.out.println("Goodbye!");
 		System.exit(0);
 	}
+	
 	
 	public NewBoard getBoard() {
 		return _board;

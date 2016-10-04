@@ -1,19 +1,24 @@
 import java.util.Random;
 
 public class NewDumbAi extends NewPlayer {
-	private Random _random;
+	protected Random _random;
 	
 	public NewDumbAi() {
 		_name = "Dumb AI";
-		_random = new Random();
+		init();
 	}
 
 	public NewDumbAi(String name) {
 		super(name);
+		init();
 	}
 	
 	public void takeTurn(Game game) {
 		getMove(game);
+	}
+	
+	protected void init() {
+		_random = new Random();
 	}
 	
 	protected Move getMove(Game game) {

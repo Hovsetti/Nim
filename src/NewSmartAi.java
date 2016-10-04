@@ -17,7 +17,8 @@ public class NewSmartAi extends NewDumbAi {
 		init();
 	}
 	
-	private void init() {
+	protected void init() {
+		super.init();
 		if (weightedTurns == null) {
 			weightedTurns = new HashMap<>();	
 		}
