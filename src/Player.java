@@ -1,5 +1,6 @@
 import java.util.Scanner;
 
+@Deprecated
 public class Player {
 
 	private String currentPlayer = "player1";

@@ -1,4 +1,4 @@
-
+@Deprecated
 public class Piece {
 	
 	private char character = 'o';

@@ -1,4 +1,5 @@
 
+@Deprecated
 public class Ai {
 	
 	private String currentAi;

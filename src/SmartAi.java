@@ -1,4 +1,5 @@
 
+@Deprecated
 public class SmartAi {
 
 	private boolean rowChosen = false;

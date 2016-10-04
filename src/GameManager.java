@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
+@Deprecated
 public class GameManager {
 
 	private final int START_ROW_ONE_SIZE = 3;

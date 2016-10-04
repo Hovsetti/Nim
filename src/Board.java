@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 
+@Deprecated
 public class Board {
 
 	public void drawBoard(ArrayList<Piece> rowOne, ArrayList<Piece> rowTwo, ArrayList<Piece> rowThree){
