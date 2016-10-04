@@ -15,7 +15,7 @@ public class State {
 	private ArrayList<Integer> _rowValues;
 	
 	
-	public State(NewBoard board) {
+	public State(Board board) {
 		export(board);
 	}
 	
@@ -25,7 +25,7 @@ public class State {
 	 * but rather that each row contains the same amount of pieces.
 	 * @param board
 	 */
-	private void export(NewBoard board) {
+	private void export(Board board) {
 		Row[] rows = board.getRows();
 		
 		_rowValues = new ArrayList<>();

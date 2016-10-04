@@ -9,8 +9,8 @@ public class Game {
 	 */
 	private static final int ITERATIONS = 100;
 	
-	private NewPlayer[] _players;
-	private NewBoard _board;
+	private Player[] _players;
+	private Board _board;
 	private Random _random;
 	private Scanner _console;
 	private int _playerIndex;
@@ -23,7 +23,7 @@ public class Game {
 	 * Initializes a new game
 	 */
 	private void init() {
-		_board = new NewBoard();
+		_board = new Board();
 		_random = new Random();
 		_console = new Scanner(System.in);
 		_playerIndex = 0;
@@ -36,7 +36,7 @@ public class Game {
 	 */
 	private void reset() {
 		System.out.println("RESET()");
-		_board = new NewBoard();
+		_board = new Board();
 	}
 	
 	/**
@@ -198,21 +198,21 @@ public class Game {
 	 * @param gameMode - Type of game mode to play
 	 * @return array containing players
 	 */
-	private NewPlayer[] createPlayers(int gameMode) {
-		NewPlayer[] players = null;
+	private Player[] createPlayers(int gameMode) {
+		Player[] players = null;
 		
 		switch (gameMode) {
 		case 1:
-			players = new NewPlayer[] { new HumanPlayer("Human 1"), new HumanPlayer("Human 2") };
+			players = new Player[] { new HumanPlayer("Human 1"), new HumanPlayer("Human 2") };
 			break;
 		case 2:
-			players = new NewPlayer[] { new HumanPlayer("Human"), new NewDumbAi("DumbAI") };
+			players = new Player[] { new HumanPlayer("Human"), new DumbAi("DumbAI") };
 			break;
 		case 3:
-			players = new NewPlayer[] { new NewDumbAi("DumbAI"), new NewSmartAi("SmartAI") };
+			players = new Player[] { new DumbAi("DumbAI"), new SmartAi("SmartAI") };
 			break;
 		case 4:
-			players = new NewPlayer[] { new NewSmartAi("SmartAI 1"), new NewSmartAi("SmartAI 2") };
+			players = new Player[] { new SmartAi("SmartAI 1"), new SmartAi("SmartAI 2") };
 			break;
 			default:
 				throw new IllegalArgumentException(String.format("Invalid game mode: [%d]", gameMode));
@@ -239,7 +239,7 @@ public class Game {
 			quit();
 		}
 		
-		NewPlayer curPlayer = null;		
+		Player curPlayer = null;		
 		_players = createPlayers(gameMode);
 		
 		for (int j = 0; j < ITERATIONS; ++j) {
@@ -264,7 +264,7 @@ public class Game {
 	 * Prints out the stats for all players.
 	 */
 	private void printStats() {
-		for (NewPlayer p : _players) {
+		for (Player p : _players) {
 			double winRate = (double)p.getWinCount() / ITERATIONS;
 			System.out.format("\n%s won %.2f%%\n", p, winRate);
 		}
@@ -274,11 +274,11 @@ public class Game {
 	 * 
 	 * @return next player in the array.
 	 */
-	private NewPlayer nextPlayer() {
+	private Player nextPlayer() {
 		if (++_playerIndex >= _players.length) {
 			_playerIndex = 0;
 		}
-		NewPlayer player = _players[_playerIndex];
+		Player player = _players[_playerIndex];
 		return player;
 	}
 	
@@ -286,9 +286,9 @@ public class Game {
 	 * 
 	 * @return random player from the array
 	 */
-	private NewPlayer getRandPlayer() {
+	private Player getRandPlayer() {
 		int index = _random.nextInt(_players.length);
-		NewPlayer player = _players[index];
+		Player player = _players[index];
 		return player;
 	}
 	
@@ -301,7 +301,7 @@ public class Game {
 	}
 	
 	
-	public NewBoard getBoard() {
+	public Board getBoard() {
 		return _board;
 	}
 }

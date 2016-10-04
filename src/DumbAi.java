@@ -1,14 +1,14 @@
 import java.util.Random;
 
-public class NewDumbAi extends NewPlayer {
+public class DumbAi extends Player {
 	protected Random _random;
 	
-	public NewDumbAi() {
+	public DumbAi() {
 		_name = "Dumb AI";
 		init();
 	}
 
-	public NewDumbAi(String name) {
+	public DumbAi(String name) {
 		super(name);
 		init();
 	}
@@ -22,7 +22,7 @@ public class NewDumbAi extends NewPlayer {
 	}
 	
 	protected Move getMove(Game game) {
-		NewBoard board = game.getBoard();
+		Board board = game.getBoard();
 		
 		int[] rows = board.getFilledRows();
 		int randRow = rows[_random.nextInt(rows.length)];
