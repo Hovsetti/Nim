@@ -1,32 +1,33 @@
-import java.util.Scanner;
 
-public class Player {
-
-	private String currentPlayer = "player1";
-	private boolean rowChosen = false;
-	private boolean peicesChosen = false;
+public abstract class Player {
+	protected String _name;
+	protected int _winCount;
 	
-	public String getCurrentPlayer() {
-		return currentPlayer;
+	public Player() {
+		
+	}
+	
+	public Player(String name) {
+		_name = name;
+	}
+	
+	public abstract void takeTurn(Game game);
+	
+	public void finalizeGame() {}
+	
+	public void AddWin() {
+		_winCount++;
 	}
 
-	public void setCurrentPlayer(String currentPlayer) {
-		this.currentPlayer = currentPlayer;
+	public int getWinCount() {
+		return _winCount;
 	}
-
-	public boolean isRowChosen() {
-		return rowChosen;
+	
+	public String getName() {
+		return _name;
 	}
-
-	public void setRowChosen(boolean rowChosen) {
-		this.rowChosen = rowChosen;
-	}
-
-	public boolean isPeicesChosen() {
-		return peicesChosen;
-	}
-
-	public void setPeicesChosen(boolean peicesChosen) {
-		this.peicesChosen = peicesChosen;
+	
+	public String toString() {
+		return _name;
 	}
 }

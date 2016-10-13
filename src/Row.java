@@ -45,6 +45,10 @@ public class Row {
 		return _count;
 	}
 	
+	public void setCount(int count) {
+		_count = count;
+	}
+	
 	/**
 	 * Checks to see if we can remove the specified amount
 	 * from this row.

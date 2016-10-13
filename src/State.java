@@ -8,12 +8,12 @@ import java.util.Collections;
  *
  */
 public class State implements Comparable<State> {
+	
 	/*
 	 * Board export stuff.
 	 */
 	private int _piecesLeft;
 	private ArrayList<Integer> _rowValues;
-	private int _count;
 	
 	
 	public State(Board board) {
@@ -39,10 +39,6 @@ public class State implements Comparable<State> {
 		Collections.sort(_rowValues);
 	}
 	
-	public void addUse() {
-		_count++;
-	}
-	
 	public ArrayList<Integer> getRowValues() {
 		return _rowValues;
 	}
@@ -51,32 +47,42 @@ public class State implements Comparable<State> {
 		return _piecesLeft;
 	}
 	
-	public int getUseCount() {
-		return _count;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + _piecesLeft;
+		result = prime * result + ((_rowValues == null) ? 0 : _rowValues.hashCode());
+		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		State otherState = (State)obj;
-		boolean isEqual = _piecesLeft == otherState.getPiecesLeft() 
-						&& _rowValues.equals(otherState.getRowValues());
+		State other = (State) obj;
+		boolean isEqual = _piecesLeft == other.getPiecesLeft()
+						 && _rowValues.equals(other.getRowValues());
 		return isEqual;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("Used: %8d \t Pieces remaining %8d \t", _count, _piecesLeft));
+		sb.append(String.format("Remaining:%5d\t--> [", _piecesLeft));
 		
 		_rowValues.stream().forEach((j) -> {
 			sb.append(j + ",");
 		});
+		// remove last trailing comma and add close bracket
+		int index = sb.lastIndexOf(",");
+		sb.replace(index, index + 1, "");
+		sb.append("]");
+		
 		return sb.toString();
 	}
 
 	@Override
-	public int compareTo(State state) {
-		int diff = _count - state.getUseCount();
+	public int compareTo(State o) {
+		int diff = getPiecesLeft() - o.getPiecesLeft();
 		return diff;
 	}
 }

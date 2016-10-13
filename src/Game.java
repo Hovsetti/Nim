@@ -3,22 +3,19 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Game {	
-	
-	/*
-	 * Changed NumberFormatException to print out useful info (lowest form)
-	 *  
-	 */
-	
+		
 	/*
 	 * Amount of games to run for learning AI
 	 */
-	private static final int ITERATIONS = 1337;
+	private static final int ITERATIONS = 100;
 	
 	private Player[] _players;
 	private Board _board;
 	private Random _random;
 	private Scanner _console;
 	private int _playerIndex;
+	
+	private int _turnNum;
 	
 	public Game() {
 		init();
@@ -32,6 +29,7 @@ public class Game {
 		_random = new Random();
 		_console = new Scanner(System.in);
 		_playerIndex = 0;
+		_turnNum = 1;
 		
 //		promptGameMode();
 	}
@@ -42,6 +40,7 @@ public class Game {
 	private void reset() {
 		System.out.println(" RESET()");
 		_board = new Board();
+		_turnNum = 1;
 	}
 	
 	
@@ -157,6 +156,7 @@ public class Game {
 	 * Gets string representation of the NimSum from all rows in the board.
 	 * @return binary string representation of the NimSum
 	 */
+	@Deprecated // no longer using this for getting moves
 	public String nimSum() {
 		ArrayList<String> binNums = getBinNums();
 		
@@ -186,6 +186,7 @@ public class Game {
 	 * 
 	 * @return ArrayList of padded binary string representations of each data set
 	 */
+	@Deprecated // no longer using this in conjunction with nimSum
 	private ArrayList<String> getBinNums() {
 		ArrayList<String> binNums = new ArrayList<>();
 		
@@ -276,15 +277,25 @@ public class Game {
 				
 				_board.draw();
 				curPlayer.takeTurn(this);
+				SmartAi.storeCurrentGamestate(this);
+				++_turnNum;
 			}
-			// winner is player that makes last move.
-			
-//			curPlayer = nextPlayer();
+			curPlayer = nextPlayer();
 			curPlayer.AddWin();
-			System.out.format("%s won!", curPlayer);
+			System.out.format("%s won!\n", curPlayer);
+			finalizeGame();
 			reset();
 		}
 		printStats();
+	}
+	
+	/**
+	 * Final cleanup after a game has ended.
+	 */
+	private void finalizeGame() {
+		for (Player p : _players) {
+			p.finalizeGame();
+		}
 	}
 	
 	/**
@@ -292,8 +303,8 @@ public class Game {
 	 */
 	private void printStats() {
 		for (Player p : _players) {
-			double winRate = (double)p.getWinCount() / ITERATIONS;
-			System.out.format("\n%s won %.2f%%\n", p, (winRate*100));
+			double winRate = ((double)p.getWinCount() / ITERATIONS) * 100;
+			System.out.format("\n%s won %.2f%%\n", p, winRate);
 		}
 	}
 	
@@ -330,5 +341,9 @@ public class Game {
 	
 	public Board getBoard() {
 		return _board;
+	}
+
+	public int getTurnNum() {
+		return _turnNum;
 	}
 }
